@@ -1,0 +1,108 @@
+Guide_Git_Nouveaux_Collaborateurs.txt  ////////// a lire avant de pratiquer ///////
+--------------------------------------
+
+## Guide Git pour les nouveaux collaborateurs
+
+### 1. Cloner le projet
+D'abord, vous allez cloner le projet avec la commande :
+
+git clone https://github.com/X-jonica/audio-python.git
+
+### 2. Créer une branche de travail
+Une fois le projet cloné et prêt à l'emploi, ouvrez le projet dans un terminal et assurez-vous que vous êtes dans le bon répertoire. Ensuite, créez votre propre branche de travail avec la commande :
+
+git checkout -b nom_de_votre_branche
+
+### 3. Vérifier la branche active
+Après avoir exécuté la commande, vérifiez que vous êtes bien sur la bonne branche avec :
+
+git branch
+
+Cette commande affichera la liste des branches et mettra en évidence votre branche actuelle en vert.
+
+### 4. Mettre à jour votre branche avec `main`
+Effectuez une première fusion (merge) pour récupérer les dernières mises à jour depuis la branche `main` :
+
+git merge main
+
+Cette commande va intégrer les modifications de `main` dans votre branche. Assurez-vous d'être bien sur votre branche avant de commencer à modifier quoi que ce soit.
+
+ATTENTION : Nous ne modifions **pas** directement la branche `main`, elle sert uniquement de point de référence pour récupérer les mises à jour !
+
+--------------------------
+
+## Comment pousser votre code une fois terminé ?
+
+Une fois vos modifications terminées, suivez ces étapes pour les envoyer :
+
+git add .  # Ajoute tous les fichiers modifiés
+OU
+git add nom_du_fichier_que_vous_avez_modifié.extension  # Ajoute un fichier spécifique
+
+Ensuite, effectuez un commit avec un commentaire clair :
+
+git commit -m "Description précise de vos modifications"
+
+Puis, poussez votre code vers votre branche :
+
+git push origin nom_de_votre_branche
+
+Pourquoi utiliser votre branche et non `main` ?  
+Parce que chacun travaille sur **sa propre branche** et non directement sur `main`.
+
+### Créer une Pull Request
+Après avoir poussé votre code, rendez-vous sur le **repository GitHub**, sélectionnez votre branche et vous verrez votre dernier commit. Si tout est bon, un bouton vert **"Pull Request"** apparaîtra :
+
+- **Cliquez dessus et suivez les instructions** jusqu'à ce que la fusion soit effectuée entre votre branche et `main`.
+
+Que fait cette action ?  
+Elle permet d’intégrer votre travail dans la branche principale (`main`) de manière structurée et sans conflit.
+
+--------------------------
+
+## Comment récupérer les mises à jour d’un collègue ?
+
+### 1. Vérifier votre branche actuelle
+Dans votre terminal (dans le projet), vérifiez dans quelle branche vous êtes :
+
+git branch
+
+Vous devriez être dans **votre branche**, mais il est toujours bon de confirmer.
+
+### 2. Passer sur `main`
+Pour récupérer les mises à jour les plus récentes, passez sur `main` avec :
+
+git checkout main
+
+Une fois sur `main`, une notification de succès devrait apparaître.
+
+### 3. Mettre à jour `main` avec les derniers changements
+Exécutez la commande suivante pour mettre à jour votre branche locale :
+
+git pull origin main
+
+Ne modifiez rien dans `main` après cette étape pour éviter d’affecter le travail collaboratif.
+
+### 4. Revenir sur votre branche
+Une fois `main` mis à jour, retournez sur **votre branche** :
+
+git checkout nom_de_votre_branche
+
+Puis, récupérez les mises à jour depuis `main` en exécutant :
+
+git merge main
+
+Et voilà ! Vous avez maintenant la dernière version du projet et pouvez continuer à travailler.
+
+--------------------------
+
+## Notes importantes
+Ne modifiez pas le code directement dans `main` pour éviter de perturber le cycle de travail.  
+Si par erreur vous avez touché `main`, voici comment corriger :
+
+git add .  
+git commit -m "Correction des modifications accidentelles sur main"
+git push origin main
+
+Cela permettra de remettre à jour `main` avant de continuer sur votre propre branche !
+
