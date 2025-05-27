@@ -1,0 +1,37 @@
+src/
+├── components/
+│   ├── Auth/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   └── AuthForm.jsx
+│   ├── VoiceSearch/
+│   │   ├── AnimatedMic.jsx
+│   │   ├── VoiceSearch.jsx
+│   │   └── VoiceResults.jsx
+│   ├── User/
+│   │   ├── Profile.jsx
+│   │   └── History.jsx
+│   └── common/
+│       ├── Navbar.jsx
+│       ├── Footer.jsx
+│       └── ProtectedRoute.jsx
+├── pages/
+│   ├── HomePage.jsx
+│   ├── SearchPage.jsx
+│   ├── UserPage.jsx
+│   └── AuthPage.jsx
+├── context/
+│   ├── AuthContext.jsx
+│   └── VoiceContext.jsx
+├── hooks/
+│   ├── useVoiceRecognition.js
+│   └── useAudioAnalyser.js
+├── services/
+│   ├── authService.js
+│   ├── searchService.js
+│   └── userService.js
+├── styles/
+│   └── theme.js
+├── utils/
+│   └── helpers.js
+└── App.js

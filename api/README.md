@@ -36,3 +36,14 @@ uvicorn main:app --reload
 ```
 pip install sqlalchemy psycopg2-binary alembic
 ```
+
+---
+
+## Creation du modele de reseau de neurone
+
+installation des packages necessaires
+
+```
+pip install torch torchaudio librosa openl3 numpy scikit-learn
+```
+
