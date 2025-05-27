@@ -1,88 +1,107 @@
-# Importation des bibliothèques nécessaires
-import requests  # Pour faire des requêtes HTTP
-import os  # Pour accéder aux fichiers dans un dossier
-from bs4 import BeautifulSoup  # Pour faire du web scraping sur les pages HTML
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import os
+from werkzeug.utils import secure_filename
+import requests
+import base64
+from bs4 import BeautifulSoup
 
-# Jetons d'accès à l'API Genius et à l'API Audd.io
+app = Flask(__name__)
+CORS(app)
+
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Configurez vos clés API ici
+AUDD_API_TOKEN = 'acf83ee967532e11f23ef61e533f39e8'
 GENIUS_API_TOKEN = 'jBzjpT6DuBjYPvG3ihYuyS3tCcRsco9WAUZNrtmUfIE1KKReXQaofJtQnzfbe0A_'
-API_TOKEN = 'acf83ee967532e11f23ef61e533f39e8'
 
-# Fonction pour reconnaître une chanson à partir d’un fichier audio
 def recognize_song(file_path):
-    url = 'https://api.audd.io/'  # URL de l'API Audd.io
+    with open(file_path, 'rb') as f:
+        encoded_audio = base64.b64encode(f.read()).decode('utf-8')
+
+    url = "https://api.audd.io/"
     data = {
-        'api_token': API_TOKEN,
-        'return': 'apple_music,spotify',  # On peut demander plus d'infos (optionnel)
-    }
-    files = {
-        'file': open(file_path, 'rb'),  # Lecture du fichier audio en mode binaire
+        'api_token': AUDD_API_TOKEN,
+        'audio': encoded_audio,
+        'return': 'lyrics,apple_music,spotify',
     }
 
-    # Envoi de la requête POST à l’API Audd.io
-    response = requests.post(url, data=data, files=files)
-    return response.json()  # Retourne la réponse sous forme JSON
+    response = requests.post(url, data=data)
+    return response.json()
 
-# Fonction pour récupérer les paroles d'une chanson à partir du site Genius
-def get_genius_lyrics(artist, title):
-    base_url = "https://api.genius.com"
-    headers = {'Authorization': 'Bearer ' + GENIUS_API_TOKEN}  # Authentification
-    search_url = base_url + "/search"
-    data = {'q': f"{artist} {title}"}  # Recherche basée sur artiste + titre
-
-    # Envoi de la requête GET pour chercher la chanson sur Genius
-    response = requests.get(search_url, data=data, headers=headers)
-    json_resp = response.json()
-
-    # Extraction des résultats de recherche
-    hits = json_resp['response']['hits']
-    if hits:
-        # Prend le chemin de la première chanson trouvée
-        song_path = hits[0]['result']['path']
-        song_url = "https://genius.com" + song_path  # URL complète vers la page des paroles
-
-        # Télécharge le HTML de la page de paroles
-        page = requests.get(song_url)
-        html = BeautifulSoup(page.text, 'html.parser')  # Analyse HTML avec BeautifulSoup
-
-        # Ancienne méthode : vérifier la présence d'une div avec la classe 'lyrics'
-        lyrics_div = html.find('div', class_='lyrics')
+def scrape_genius_lyrics(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Nouvelle structure des paroles sur Genius
+        lyrics_div = soup.find('div', {'data-lyrics-container': 'true'})
+        if not lyrics_div:
+            # Ancienne structure de paroles
+            lyrics_div = soup.find('div', class_='lyrics')
+        
         if lyrics_div:
+            # Nettoyage des paroles
+            for br in lyrics_div.find_all('br'):
+                br.replace_with('\n')
             return lyrics_div.get_text().strip()
-        else:
-            # Nouvelle structure (plus moderne) : plusieurs blocs contenant les paroles
-            lyrics_div = html.find_all('div', class_=lambda value: value and value.startswith('Lyrics__Container'))
-            lyrics = '\n'.join([div.get_text(separator='\n').strip() for div in lyrics_div])
-            return lyrics
-    return "Paroles non trouvées."  # Aucun résultat trouvé sur Genius
+        return None
+    except Exception as e:
+        print(f"Erreur lors du scraping: {e}")
+        return None
 
-# Fonction principale
-def main():
-    songs_folder = 'songs'  # Dossier contenant les fichiers audio
-
-    # Parcourt tous les fichiers dans le dossier "songs"
-    for filename in os.listdir(songs_folder):
-        if filename.endswith(('.mp3', '.wav', '.m4a')):  # Vérifie si c’est un fichier audio supporté
-            full_path = os.path.join(songs_folder, filename)
-            print(f'Reconnaissance pour: {filename}')
+def get_genius_lyrics(artist, title):
+    headers = {"Authorization": f"Bearer {GENIUS_API_TOKEN}"}
+    search_url = f"https://api.genius.com/search?q={artist} {title}"
+    
+    try:
+        response = requests.get(search_url, headers=headers)
+        if response.status_code != 200:
+            return None
             
-            # Appelle la fonction de reconnaissance musicale
-            result = recognize_song(full_path)
+        data = response.json()
+        if not data['response']['hits']:
+            return None
+            
+        song_path = data['response']['hits'][0]['result']['path']
+        lyrics_url = f"https://genius.com{song_path}"
+        
+        # Scraping des paroles depuis la page
+        return scrape_genius_lyrics(lyrics_url)
+        
+    except Exception as e:
+        print(f"Erreur API Genius: {e}")
+        return None
 
-            # Vérifie si la reconnaissance a réussi
-            if result.get('status') == 'success' and result.get('result'):
-                song_info = result['result']
-                title = song_info.get('title', 'Titre inconnu')
-                artist = song_info.get('artist', 'Artiste inconnu')
-                print(f'Titre : {title}')
-                print(f'Artiste : {artist}')
+@app.route('/api/recognize', methods=['POST'])
+def recognize_from_upload():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'Fichier audio manquant'}), 400
 
-                # Appelle la fonction pour obtenir les paroles
-                lyrics = get_genius_lyrics(artist, title)
-                print("\nParoles:\n", lyrics)  # Affiche seulement les 500 premiers caractères
-                print("\n" + "="*40 + "\n")
-            else:
-                print('Chanson non reconnue.\n')
+    file = request.files['audio']
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(file_path)
 
-# Point d'entrée du script
+    result = recognize_song(file_path)
+    if result.get('status') == 'success' and result.get('result'):
+        song_info = result['result']
+        title = song_info.get('title', 'Titre inconnu')
+        artist = song_info.get('artist', 'Artiste inconnu')
+        youtube_url = song_info.get('youtube', {}).get('url', '') or song_info.get('song_link', '')
+        
+        # Récupération des paroles
+        lyrics = get_genius_lyrics(artist, title) or "Paroles non disponibles"
+
+        return jsonify({
+            'title': title,
+            'artist': artist,
+            'lyrics': lyrics,
+            'youtube_url': youtube_url
+        })
+
+    return jsonify({'message': 'Chanson non reconnue.'}), 404
+
 if __name__ == '__main__':
-    main()
+    app.run(host='0.0.0.0', port=8000, debug=True)
