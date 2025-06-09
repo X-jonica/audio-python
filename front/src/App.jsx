@@ -354,7 +354,7 @@ function App() {
                         rel="noreferrer"
                         sx={{ mb: 3 }}
                      >
-                        Écouter sur YouTube
+                        Écouter la musique
                      </Button>
                   )}
 
