@@ -13,8 +13,8 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Configurez vos clés API ici
-AUDD_API_TOKEN = 'acf83ee967532e11f23ef61e533f39e8'
-GENIUS_API_TOKEN = 'jBzjpT6DuBjYPvG3ihYuyS3tCcRsco9WAUZNrtmUfIE1KKReXQaofJtQnzfbe0A_'
+AUDD_API_TOKEN = '42fb6840c6985d242ffa8f6d571a5879'
+GENIUS_API_TOKEN = 'AOzwNqHayVDaIa9VW_YJ9ln65RO145FMn7X0W81uzOi5BoKQG_xvZdvSC8ihLjMF'
 
 def recognize_song(file_path):
     with open(file_path, 'rb') as f:
