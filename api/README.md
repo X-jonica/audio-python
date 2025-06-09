@@ -24,10 +24,10 @@ pip install fastapi uvicorn[standard] python-dotenv
 pip freeze > requirements.txt
 ```
 
-5- Lancacement du serveur
+5- Lancacement du backend
 
 ```
-uvicorn main:app --reload
+python main.py
 ```
 
 ##Etape 2 : Integré PostgreSQL avec SQLAlchemy
@@ -46,4 +46,3 @@ installation des packages necessaires
 ```
 pip install torch torchaudio librosa openl3 numpy scikit-learn
 ```
-
