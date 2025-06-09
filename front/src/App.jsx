@@ -34,7 +34,6 @@ const ListeningButton = styled(Button)(({ theme, islistening }) => ({
 
 function App() {
    const [listening, setListening] = useState(false);
-   const [volume, setVolume] = useState(0);
    const [result, setResult] = useState(null);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState(null);
@@ -114,8 +113,6 @@ function App() {
          const data = new Uint8Array(analyser.frequencyBinCount);
          const updateVolume = () => {
             analyser.getByteFrequencyData(data);
-            const avg = data.reduce((a, b) => a + b, 0) / data.length;
-            setVolume(Math.min(100, Math.round(avg)));
             if (listening) requestAnimationFrame(updateVolume);
          };
          updateVolume();
@@ -300,12 +297,6 @@ function App() {
                      },
                   }}
                />
-               <Typography
-                  variant="caption"
-                  sx={{ display: "block", mt: 1, textAlign: "center" }}
-               >
-                  Volume détecté: {volume}%
-               </Typography>
             </Box>
          )}
 
