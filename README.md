@@ -19,3 +19,15 @@ pip install -r requirments.txt
 ```
 python main.py
 ```
+
+## instruction frontend 
+
+1- installation de npm 
+```
+npm install
+```
+
+2- execution du projet 
+```
+npm run dev
+```
