@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import requests
 import base64
 from bs4 import BeautifulSoup
+from models.models import db, Historique 
 
 app = Flask(__name__)
 CORS(app)
@@ -76,9 +77,10 @@ def get_genius_lyrics(artist, title):
 
 @app.route('/api/recognize', methods=['POST'])
 def recognize_from_upload():
-    if 'audio' not in request.files:
-        return jsonify({'error': 'Fichier audio manquant'}), 400
+    if 'audio' not in request.files or 'utilisateur_id' not in request.form:
+        return jsonify({'error': 'Fichier audio ou utilisateur manquant'}), 400
 
+    utilisateur_id = request.form['utilisateur_id']
     file = request.files['audio']
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
@@ -94,6 +96,15 @@ def recognize_from_upload():
         # Récupération des paroles
         lyrics = get_genius_lyrics(artist, title) or "Paroles non disponibles"
 
+        # 🔥 Enregistrer dans l’historique
+        historique = Historique(
+            titre=f"{artist} - {title}",
+            paroles=lyrics,
+            utilisateur_id=utilisateur_id
+        )
+        db.session.add(historique)
+        db.session.commit()
+
         return jsonify({
             'title': title,
             'artist': artist,
@@ -102,6 +113,7 @@ def recognize_from_upload():
         })
 
     return jsonify({'message': 'Chanson non reconnue.'}), 404
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
