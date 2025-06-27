@@ -1,33 +1,45 @@
-## instructions backend 
+## instructions backend
 
-1- apres telechargent , creation de l'environnement virtuel
+apres telechargent ,
+
+cd backend/
+
+1- creation de l'environnement virtuel
+
 ```
 python -m venv env
 ```
 
-2-demarage de l'env 
+2- demarage de l'env ou environnement virtuel
+
 ```
 ./env/Scripts/activate
 ```
 
-3- installation des dependances necessaires au projet 
+3- installation des dependances necessaires au projet
+
 ```
 pip install -r requirments.txt
 ```
 
-4- Demarage du backend 
+4- Demarage du backend
+
 ```
-python main.py
+python app.py
 ```
 
-## instruction frontend 
+## instruction frontend
 
-1- installation de npm 
+cd melo/
+
+1- installation de npm
+
 ```
 npm install
 ```
 
-2- execution du projet 
+2- execution du projet
+
 ```
 npm run dev
 ```
