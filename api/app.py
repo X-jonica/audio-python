@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from config import Config
-from models.models import db, Historique
+from models.models import db, History 
 from routes.auth_routes import auth_bp
 from routes.historique_routes import historique_bp
 from sqlalchemy import text
@@ -10,23 +10,20 @@ from werkzeug.utils import secure_filename
 import requests
 import base64
 from bs4 import BeautifulSoup
-from flask_cors import CORS
-
 
 # Initialisation de l'application
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
-# Configuration de la base de données
+
+# CORS configuration
+CORS(app, resources={r"/api/*": {"origins": "*"}}, 
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
+
+
+# Initialisation de la base de données
 db.init_app(app)
 
-# Configuration du dossier d'upload
+# Dossier d'upload
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -34,16 +31,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 AUDD_API_TOKEN = 'da6969d0632020f9d86d7e191ff8c280'
 GENIUS_API_TOKEN = '4PV0qIptp2pzaUZxMttK_AAUcJJAW1cn9oV4R2_dHeSRAiYH5IFN8Bbpw3cwWEtz'
 
-# Vérification de la connexion à la base de données
+# Vérification de la base de données
 with app.app_context():
     try:
         db.create_all()
-        db.session.execute(text('SELECT 1')) 
+        db.session.execute(text('SELECT 1'))
         print("✅ Connexion à la base de données réussie.")
     except Exception as e:
         print("❌ Échec de la connexion à la base de données :", e)
 
-# Fonctions pour la reconnaissance musicale
+# Reconnaissance musicale
 def recognize_song(file_path):
     with open(file_path, 'rb') as f:
         encoded_audio = base64.b64encode(f.read()).decode('utf-8')
@@ -58,15 +55,16 @@ def recognize_song(file_path):
     response = requests.post(url, data=data)
     return response.json()
 
+# Scraping des paroles sur Genius
 def scrape_genius_lyrics(url):
     try:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        
+
         lyrics_div = soup.find('div', {'data-lyrics-container': 'true'})
         if not lyrics_div:
             lyrics_div = soup.find('div', class_='lyrics')
-        
+
         if lyrics_div:
             for br in lyrics_div.find_all('br'):
                 br.replace_with('\n')
@@ -76,54 +74,57 @@ def scrape_genius_lyrics(url):
         print(f"Erreur lors du scraping: {e}")
         return None
 
+# Obtenir les paroles via Genius API
 def get_genius_lyrics(artist, title):
     headers = {"Authorization": f"Bearer {GENIUS_API_TOKEN}"}
     search_url = f"https://api.genius.com/search?q={artist} {title}"
-    
+
     try:
         response = requests.get(search_url, headers=headers)
         if response.status_code != 200:
             return None
-            
+
         data = response.json()
         if not data['response']['hits']:
             return None
-            
+
         song_path = data['response']['hits'][0]['result']['path']
         lyrics_url = f"https://genius.com{song_path}"
         return scrape_genius_lyrics(lyrics_url)
-        
+
     except Exception as e:
         print(f"Erreur API Genius: {e}")
         return None
 
-# Routes pour la reconnaissance musicale
+# Route pour reconnaissance et enregistrement
 @app.route('/api/recognize', methods=['POST'])
 def recognize_from_upload():
-    if 'audio' not in request.files or 'utilisateur_id' not in request.form:
-        return jsonify({'error': 'Fichier audio ou utilisateur manquant'}), 400
+    if 'audio' not in request.files or 'user_id' not in request.form:
+        return jsonify({'error': 'Fichier audio ou identifiant utilisateur manquant'}), 400
 
-    utilisateur_id = request.form['utilisateur_id']
+    user_id = request.form['user_id']
     file = request.files['audio']
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
 
     result = recognize_song(file_path)
+
     if result.get('status') == 'success' and result.get('result'):
         song_info = result['result']
         title = song_info.get('title', 'Titre inconnu')
         artist = song_info.get('artist', 'Artiste inconnu')
         youtube_url = song_info.get('youtube', {}).get('url', '') or song_info.get('song_link', '')
-        
+
         lyrics = get_genius_lyrics(artist, title) or "Paroles non disponibles"
 
-        historique = Historique(
-            titre=f"{artist} - {title}",
+        # Enregistrement dans la base
+        history = History(
+            title=f"{artist} - {title}",
             paroles=lyrics,
-            utilisateur_id=utilisateur_id
+            user_id=user_id
         )
-        db.session.add(historique)
+        db.session.add(history)
         db.session.commit()
 
         return jsonify({
@@ -131,10 +132,11 @@ def recognize_from_upload():
             'artist': artist,
             'lyrics': lyrics,
             'youtube_url': youtube_url
-        })
+        }), 200
 
     return jsonify({'message': 'Chanson non reconnue.'}), 404
 
+# Route sans enregistrement
 @app.route('/api/search', methods=['POST'])
 def search_only():
     print("Requête reçue sur /api/search")
@@ -147,6 +149,7 @@ def search_only():
     file.save(file_path)
 
     result = recognize_song(file_path)
+
     if result.get('status') == 'success' and result.get('result'):
         song_info = result['result']
         title = song_info.get('title', 'Titre inconnu')
@@ -160,7 +163,7 @@ def search_only():
             'artist': artist,
             'lyrics': lyrics,
             'youtube_url': youtube_url
-        })
+        }), 200
 
     return jsonify({'message': 'Chanson non reconnue.'}), 404
 
@@ -168,6 +171,7 @@ def search_only():
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(historique_bp, url_prefix='/api')
 
+# Démarrage de l'application
 if __name__ == '__main__':
     print("🚀 Serveur Flask lancé sur http://localhost:8000")
     app.run(host='0.0.0.0', port=8000, debug=True)

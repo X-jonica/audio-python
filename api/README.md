@@ -82,10 +82,8 @@ pip install python-dotenv
 
 ---
 
-### Changement de notre source AuDD par acrcloud , session expirer ;
-
-### recuperation du SDK de acrcloud dans github avec la commande
+### 🦿 Etape 9 : installation du pyjwt pour la securisation en utilisant un token :
 
 ```
-git clone https://github.com/acrcloud/acrcloud_sdk_python.git
+pip install pyjwt
 ```
