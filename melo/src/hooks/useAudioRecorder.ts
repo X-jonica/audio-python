@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import toWav from "audiobuffer-to-wav";
 
 export interface UseAudioRecorderReturn {
   isRecording: boolean;
@@ -14,6 +15,16 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ⚠️ Conversion webm → wav
+  async function convertWebmToWav(webmBlob: Blob): Promise<Blob> {
+    const arrayBuffer = await webmBlob.arrayBuffer();
+    const audioCtx = new AudioContext();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+    const wavBuffer = toWav(audioBuffer);
+    return new Blob([wavBuffer], { type: "audio/wav" });
+  }
 
   const startRecording = useCallback(async (): Promise<void> => {
     try {
@@ -44,7 +55,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
       setIsRecording(true);
       setRecordingTime(0);
       
-      // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
@@ -62,21 +72,27 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
         return;
       }
 
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
-        resolve(blob);
-        
+      mediaRecorderRef.current.onstop = async () => {
+        const webmBlob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
+
+        try {
+          const wavBlob = await convertWebmToWav(webmBlob); // ✅ conversion ici
+          resolve(wavBlob);
+        } catch (error) {
+          console.error("Erreur lors de la conversion en WAV :", error);
+          resolve(null);
+        }
+
         // Cleanup
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
           streamRef.current = null;
         }
-        
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
-        
+
         setIsRecording(false);
         setRecordingTime(0);
       };

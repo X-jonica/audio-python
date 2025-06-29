@@ -13,7 +13,6 @@ import {
 import { PersonAdd } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import axios from "axios"
 
 const RegisterPage: React.FC = () => {
