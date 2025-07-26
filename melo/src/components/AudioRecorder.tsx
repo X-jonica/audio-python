@@ -71,12 +71,12 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onResult, onError }) => {
             let response;
             if (user) {
                 formData.append("user_id", user.id);
-                response = await fetch("http://localhost:8000/api/recognize", {
+                response = await fetch("https://audio-python.onrender.com/api/recognize", {
                     method: "POST",
                     body: formData,
                 });
             } else {
-                response = await fetch("http://localhost:8000/api/search", {
+                response = await fetch("https://audio-python.onrender.com/api/search", {
                     method: "POST",
                     body: formData,
                 });
