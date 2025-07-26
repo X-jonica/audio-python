@@ -24,7 +24,7 @@ app.config.from_object(Config)
 # Par cette configuration plus complète :
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173", "https://audio-python-beta.vercel.app/"],
+        "origins": ["http://localhost:5173", "https://audio-python-beta.vercel.app"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -236,7 +236,8 @@ app.register_blueprint(historique_bp, url_prefix='/api')
 if __name__ == '__main__':
     port = os.environ.get("PORT")
     if port is None:
-        raise RuntimeError("❌ La variable d'environnement PORT est introuvable. Render ne peut pas fonctionner sans elle.")
+        raise RuntimeError("❌ PORT non configuré")
     
-    print(f"🚀 Serveur Flask lancé sur le port {port}")
+    print(f"🚀 Lancement sur le port {port}...")
     app.run(host="0.0.0.0", port=int(port))
+    print("✅ Serveur en ligne !") 
