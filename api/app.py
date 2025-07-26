@@ -219,5 +219,6 @@ app.register_blueprint(historique_bp, url_prefix='/api')
 
 # === Lancement serveur ===
 if __name__ == '__main__':
-    print("🚀 Serveur Flask lancé sur http://localhost:8000")
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    port = int(os.environ.get("PORT", 8000))  # Défaut 8000 si PORT non défini
+    print("🚀 Serveur Flask lancé sur le port {}".format(port))
+    app.run(host='0.0.0.0', port=port, debug=True)
