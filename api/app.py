@@ -23,18 +23,18 @@ app.config.from_object(Config)
 # === Activation de CORS pour le frontend ===
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173", "https://audio-python-beta.vercel.app"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "origins": ["*"],
+        "methods": ["GET", "POST", "PUT","DELETE", "OPTIONS"],
+        "allow_headers": ["*"]
     }
 })
 
 # === Middleware CORS pour OPTIONS ===
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
     return response
 
 # === Initialisation de la base de données ===
@@ -226,6 +226,5 @@ def home():
 
 # === Lancement du serveur ===
 if __name__ == '__main__':
-    port = int(os.getenv("PORT", 5000)) 
-    print(f"🚀 Lancement sur le port {port}...")
-    app.run(host="0.0.0.0", port=port)
+    print("Serveur demaré")
+    app.run()
