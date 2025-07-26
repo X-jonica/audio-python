@@ -220,6 +220,10 @@ def search_only():
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(historique_bp, url_prefix='/api')
 
+@app.route('/')
+def home():
+    return "Bienvenue sur mon API Flask déployée !"
+
 # === Lancement du serveur ===
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000)) 
