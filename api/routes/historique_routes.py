@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models.models import db, History
 from datetime import datetime
+from flask_cors import CORS
 
 historique_bp = Blueprint('historique', __name__)
+CORS(historique_bp, resources={r"/api/*": {"origins": "*"}})
 
 # Ajouter un historique
 @historique_bp.route('/history', methods=['POST'])
