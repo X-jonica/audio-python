@@ -3,12 +3,8 @@ import datetime
 from flask import Blueprint, request, jsonify, current_app
 from models.models import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_cors import CORS
-
 
 auth_bp = Blueprint('auth', __name__)
-
-CORS(auth_bp, resources={r"/api/*": {"origins": "*"}})
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

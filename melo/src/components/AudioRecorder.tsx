@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { MusicResult } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import axios from 'axios';
 
 interface AudioRecorderProps {
     onResult: (result: MusicResult) => void;
@@ -68,36 +69,36 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onResult, onError }) => {
             const formData = new FormData();
             formData.append("audio", audioBlob);
 
-            let response;
             if (user) {
                 formData.append("user_id", user.id);
-                response = await fetch("https://audio-python.onrender.com/api/recognize", {
-                    method: "POST",
-                    body: formData,
-                    mode: "cors"
-                });
-            } else {
-                response = await fetch("https://audio-python.onrender.com/api/search", {
-                    method: "POST",
-                    body: formData,
-                    mode: "cors"
-                });
             }
 
-            const result = await response.json();
+            const url = user
+                ? "https://audio-python.onrender.com/api/recognize"
+                : "https://audio-python.onrender.com/api/search";
 
-            if (!response.ok) {
-                throw new Error(result.message || "Échec de l'identification");
-            }
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                withCredentials: false
+            });
+
+            const result = response.data;
 
             setLyrics(result.lyrics || "");
             onResult(result);
         } catch (error) {
-            onError(error instanceof Error ? error.message : "Erreur inconnue");
+            if (axios.isAxiosError(error)) {
+                onError(error.response?.data?.message || "Échec de l'identification");
+            } else {
+                onError("Erreur inconnue");
+            }
         } finally {
             setIsSearching(false);
         }
     };
+
 
     const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
