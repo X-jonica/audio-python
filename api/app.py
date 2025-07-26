@@ -31,7 +31,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # === Clés API externes ===
-AUDD_API_TOKEN = 'da6969d0632020f9d86d7e191ff8c280'
+AUDD_API_TOKEN = '0fd99038f390e8b309cb872974d5ed91'
 GENIUS_API_TOKEN = '4PV0qIptp2pzaUZxMttK_AAUcJJAW1cn9oV4R2_dHeSRAiYH5IFN8Bbpw3cwWEtz'
 
 # === Charger YAMNet une seule fois au démarrage ===
