@@ -21,7 +21,22 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # === Activation de CORS pour le frontend ===
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Par cette configuration plus complète :
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173", "https://audio-python-beta.vercel.app/"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
+
+# Et ajoutez ce handler pour les requêtes OPTIONS
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # === Initialisation de la base de données ===
 db.init_app(app)
