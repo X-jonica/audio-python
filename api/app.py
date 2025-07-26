@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # === Activation de CORS pour le frontend ===
-CORS(app, resources={r"/api/*": {"origins": "https://audio-python-beta.vercel.app/"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # === Initialisation de la base de données ===
 db.init_app(app)
