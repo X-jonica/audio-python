@@ -219,6 +219,9 @@ app.register_blueprint(historique_bp, url_prefix='/api')
 
 # === Lancement serveur ===
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Render définit PORT automatiquement
+    port = os.environ.get("PORT")
+    if port is None:
+        raise RuntimeError("❌ La variable d'environnement PORT est introuvable. Render ne peut pas fonctionner sans elle.")
+    
     print(f"🚀 Serveur Flask lancé sur le port {port}")
-    app.run(host="0.0.0.0", port=port) 
+    app.run(host="0.0.0.0", port=int(port))
