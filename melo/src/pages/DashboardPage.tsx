@@ -168,7 +168,7 @@ const DashboardPage: React.FC = () => {
                                                         const response =
                                                             await axios
                                                                 .post(
-                                                                    "http://localhost:8000/api/history",
+                                                                    "https://audio-python.onrender.com/api/history",
                                                                     {
                                                                         title: `${result.artist} - ${result.title}`,
                                                                         paroles:
