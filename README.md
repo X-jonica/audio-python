@@ -13,7 +13,12 @@ python -m venv env
 2- demarage de l'env ou environnement virtuel
 
 ```
+# Sous windows
 ./env/Scripts/activate
+
+# Sous linux et macos
+source env/bin/activate
+
 ```
 
 3- installation des dependances necessaires au projet

@@ -1,0 +1,69 @@
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export interface GenrePrediction {
+    label: string;
+    score: number;
+}
+
+export interface MusicResult {
+    id?: string;
+    title: string;
+    artist: string;
+    album?: string;
+    lyrics?: string;
+    confidence: number;
+    timestamp?: string;
+    youtube_url?: string;
+    yamnet_prediction?: GenrePrediction[];
+}
+
+export interface HistoryItem {
+    id: number;
+    title: string;
+    paroles: string;
+    searchDate: string;
+    confidence: number;
+    artist?: string;
+}
+
+class ApiService {
+    private readonly baseURL: string;
+
+    constructor() {
+        this.baseURL = API_URL;
+    }
+
+    // GET /history/:user_id
+    async getSearchHistory(userId: number): Promise<HistoryItem[]> {
+        const response = await axios.get(
+            `${this.baseURL}/api/history/${userId}`
+        );
+        return response.data.map((item: any, index: number) => ({
+            id: index + 1,
+            title: item.title,
+            paroles: item.paroles,
+            searchDate: item.date,
+            confidence: 1,
+        }));
+    }
+
+    // DELETE /history/:history_id
+    async deleteHistoryItem(id: number): Promise<void> {
+        await axios.delete(`${this.baseURL}/api/history/${id}`);
+    }
+
+    // POST /history
+    async saveToHistory(result: MusicResult, userId: number): Promise<void> {
+        const payload = {
+            title: `${result.artist} - ${result.title}`,
+            paroles: result.lyrics || "Paroles non disponibles",
+            user_id: userId,
+        };
+
+        await axios.post(`${this.baseURL}/api/history`, payload);
+    }
+}
+
+export const apiService = new ApiService();
