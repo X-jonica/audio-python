@@ -19,6 +19,7 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { MusicResult as MusicResultType } from "../services/api";
+import { Link as LinkR } from "react-router-dom";
 
 interface MusicResultProps {
     result: MusicResultType;
@@ -50,7 +51,12 @@ const MusicResult: React.FC<MusicResultProps> = ({ result }) => {
                     </Box>
 
                     <Box mb={3}>
-                        <Typography variant="h4" component="h1" gutterBottom>
+                        <Typography
+                            variant="h4"
+                            component="h1"
+                            gutterBottom
+                            textAlign="center"
+                        >
                             {result.title}
                         </Typography>
 
@@ -124,7 +130,13 @@ const MusicResult: React.FC<MusicResultProps> = ({ result }) => {
                                             variant="h6"
                                             color="info.main"
                                         >
-                                            Prédictions IA (YAMNet)
+                                            Prédictions IA{" "}
+                                            <LinkR
+                                                to="https://www.tensorflow.org/hub/tutorials/yamnet?hl=fr"
+                                                className="cursor-pointer font-medium"
+                                            >
+                                                (YAMNet)
+                                            </LinkR>
                                         </Typography>
                                     </Box>
 
@@ -167,7 +179,7 @@ const MusicResult: React.FC<MusicResultProps> = ({ result }) => {
                                 borderRadius={2}
                                 bgcolor="background.paper"
                                 display="flex"
-                                justifyContent="center" 
+                                justifyContent="center"
                                 alignItems="center"
                                 boxShadow={1}
                                 border="1px solid"
@@ -177,7 +189,7 @@ const MusicResult: React.FC<MusicResultProps> = ({ result }) => {
                                     transition: "background-color 0.3s ease",
                                     "&:hover": {
                                         backgroundColor:
-                                            "rgba(255, 0, 0, 0.05)", 
+                                            "rgba(255, 0, 0, 0.05)",
                                     },
                                 }}
                             >

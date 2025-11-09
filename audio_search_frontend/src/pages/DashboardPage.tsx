@@ -17,7 +17,7 @@ import AudioRecorder from "../components/AudioRecorder";
 import MusicResult from "../components/MusicResult";
 import SearchHistory from "../components/SearchHistory";
 import { MusicResult as MusicResultType } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuddKeyModal from "./AuddKeyModal";
 import { useAuth } from "../hooks/useAuth";
@@ -97,7 +97,13 @@ const DashboardPage: React.FC = () => {
                 <div className="w-full h-auto flex justify-center items-center">
                     <Typography variant="h6" sx={{ mr: 0.5 }}>
                         <p className="text-sm text-center">
-                            Clé AUDD :{" "}
+                            <Link
+                                to="https://auth.audd.io/u/signup/identifier?state=hKFo2SB5NUloQi12WGY4Yk1KSVZ1M0xVT19qNDhzZHpkRmM0QaFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHROd0hsOE51dDNxWU0tWmxiT1lMQXdMdUxwZDIxZF82o2NpZNkgcTZGSW9qbEp0aVlTRm1TQ0t1Z3gxVjNKeUZwaVdKblA"
+                                className="cursor-pointer hover:underline hover:text-white/80 hover:font-medium"
+                                target="_blank"
+                            >
+                                Clé AUDD :
+                            </Link>
                             <span className="">
                                 {!user?.audd_key ||
                                 user.audd_key.trim() === "" ? (
