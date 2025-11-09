@@ -5,27 +5,30 @@ from services.lyrics_service import get_genius_lyrics
 from models.models import User
 import os
 
+# === Blueprint ===
 search_bp = Blueprint('search', __name__)
+
+# === Dossier d'upload ===
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@search_bp.route('/search', methods=['POST'])
-def search_only():
-    if 'audio' not in request.files or 'user_id' not in request.form:
-        return jsonify({'error': 'Fichier audio ou identifiant utilisateur manquant'}), 400
+# === Clé publique pour recherche générale ===
+AUDD_KEY_PUBLIC = "1e128b3404e0f278e55d9a25074e0189"
 
-    user_id = request.form['user_id']
-    user = User.query.get(user_id)
-    if not user or not user.audd_key:
-        return jsonify({'error': 'Clé AUDD de l’utilisateur introuvable'}), 400
+
+# === ROUTE : recherche publique (ne nécessite pas d'utilisateur) ===
+@search_bp.route('/search', methods=['POST'])
+def public_search():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'Fichier audio manquant'}), 400
 
     file = request.files['audio']
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
 
-    # Utilise toujours la clé de l’utilisateur
-    result = recognize_song(file_path, user.audd_key)
+    # Recherche avec clé publique
+    result = recognize_song(file_path, AUDD_KEY_PUBLIC)
 
     if result.get('status') == 'success' and result.get('result'):
         song_info = result['result']

@@ -253,7 +253,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onResult, onError }) => {
                                         />
                                     </motion.div>
                                     <Typography variant="h6">
-                                        Identification en cours...
+                                        Recherche de correspondance...
                                     </Typography>
                                 </Box>
 

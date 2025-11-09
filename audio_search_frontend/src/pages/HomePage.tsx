@@ -90,7 +90,7 @@ const HomePage: React.FC = () => {
                   fontSize: { xs: '2.5rem', md: '3.5rem' },
                 }}
               >
-                SoundWave
+                Mozik
               </Typography>
               <Typography
                 variant="h4"
