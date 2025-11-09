@@ -13,8 +13,8 @@ import { Mic, MicOff, MusicNote, ContentCopy } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAudioRecorder } from "../hooks/useAudioRecorder";
 import { MusicResult } from "../services/api";
-import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
+import { useAuth } from "../hooks/useAuth";
 
 interface AudioRecorderProps {
     onResult: (result: MusicResult) => void;

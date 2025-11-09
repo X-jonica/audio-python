@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { CheckCircle, Edit, Logout, MusicNote } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { useAuth } from "../contexts/AuthContext";
 import AudioRecorder from "../components/AudioRecorder";
 import MusicResult from "../components/MusicResult";
 import SearchHistory from "../components/SearchHistory";
@@ -21,6 +20,8 @@ import { MusicResult as MusicResultType } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuddKeyModal from "./AuddKeyModal";
+import { useAuth } from "../hooks/useAuth";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -54,6 +55,8 @@ const DashboardPage: React.FC = () => {
         setError(null);
     };
 
+    console.log(user?.audd_key);
+
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
             <AppBar
@@ -64,55 +67,64 @@ const DashboardPage: React.FC = () => {
                 <Toolbar>
                     <Box display="flex" alignItems="center" flexGrow={1}>
                         <MusicNote sx={{ color: "primary.main", mr: 1 }} />
-                        <Typography
-                            variant="h6"
-                            component="div"
-                            marginRight={3}
-                        >
-                            Mozik_Search
-                        </Typography>
-                        <Box display="flex" alignItems="center" mr={2}>
-                            <Typography variant="body2" sx={{ mr: 0.5 }}>
-                                Clé AUDD :{" "}
-                                {auddKey.length === 0
-                                    ? "COMPELTE YOUR AUDD_KEY XXXXXXXXXXXXXX"
-                                    : auddKey}
+                        <div className="flex flex-col md:flex-row md:gap-4 md:items-center">
+                            <Typography variant="h6" component="div">
+                                {user?.name}
                             </Typography>
-                            <IconButton
-                                size="small"
-                                onClick={() => setModalOpen(true)}
-                            >
-                                <Edit fontSize="small" />
-                            </IconButton>
-                            <CheckCircle
-                                sx={{ color: "green", ml: 0.5 }}
-                                fontSize="small"
-                            />
-                        </Box>
+                        </div>
                         {user?.id ? (
                             <AuddKeyModal
                                 open={modalOpen}
                                 onClose={() => setModalOpen(false)}
                                 auddKey={auddKey}
                                 setAuddKey={setAuddKey}
-                                userId={user.id}
                             />
                         ) : null}
                     </Box>
-                    <Typography variant="body1" sx={{ mr: 2 }}>
-                        Bienvenue, <b>{user?.name}</b>
-                    </Typography>
-                    <Button
-                        color="inherit"
-                        startIcon={<Logout />}
-                        onClick={logout}
-                    >
-                        Déconnexion
-                    </Button>
+                    <div className="flex flex-col md:flex-row">
+                        <Button
+                            color="inherit"
+                            startIcon={<Logout />}
+                            onClick={logout}
+                        >
+                            Déconnexion
+                        </Button>
+                    </div>
                 </Toolbar>
             </AppBar>
 
             <Container maxWidth="xl" sx={{ py: 4 }}>
+                <div className="w-full h-auto flex justify-center items-center">
+                    <Typography variant="h6" sx={{ mr: 0.5 }}>
+                        <p className="text-sm text-center">
+                            Clé AUDD :{" "}
+                            <span className="">
+                                {!user?.audd_key ||
+                                user.audd_key.trim() === "" ? (
+                                    <span className="text-red-500 text-base uppercase">
+                                        AUDD token not found!
+                                    </span>
+                                ) : (
+                                    user.audd_key
+                                )}
+                            </span>
+                        </p>
+                    </Typography>
+                    <IconButton size="small" onClick={() => setModalOpen(true)}>
+                        <Edit fontSize="small" />
+                    </IconButton>
+                    {!user?.audd_key || user.audd_key.trim() === "" ? (
+                        <ErrorIcon
+                            sx={{ color: "red", ml: 0.5 }}
+                            fontSize="small"
+                        />
+                    ) : (
+                        <CheckCircle
+                            sx={{ color: "green", ml: 0.5 }}
+                            fontSize="small"
+                        />
+                    )}
+                </div>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -166,7 +178,7 @@ const DashboardPage: React.FC = () => {
                                             mb={4}
                                         >
                                             Cliquez sur le bouton ci-dessous et
-                                            laissez-nous écouter pendant 20
+                                            laissez-nous écouter pendant 15
                                             secondes
                                         </Typography>
                                         <AudioRecorder

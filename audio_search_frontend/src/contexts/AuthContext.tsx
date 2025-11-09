@@ -1,20 +1,21 @@
 import React, {
     createContext,
-    useContext,
     useState,
     useEffect,
     ReactNode,
+    useMemo,
+    useCallback,
 } from "react";
 import axios from "axios";
 
-interface User {
+export interface User {
     id: string;
     email: string;
     name: string;
     audd_key: string;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (email: string, password: string) => Promise<void>;
@@ -22,15 +23,9 @@ interface AuthContextType {
     isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = (): AuthContextType => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
-};
+export const AuthContext = createContext<AuthContextType | undefined>(
+    undefined
+);
 
 interface AuthProviderProps {
     children: ReactNode;
@@ -57,60 +52,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 ] = `Bearer ${storedToken}`;
             } catch (err) {
                 console.error("Erreur de parsing JSON du user:", err);
-                localStorage.removeItem("user"); // on nettoie pour éviter des bugs futurs
+                localStorage.removeItem("user");
             }
         }
 
         setIsLoading(false);
     }, []);
 
-    const login = async (email: string, password: string): Promise<void> => {
-        try {
-            const response = await axios.post(`${API_URL}/api/login`, {
-                email,
-                password,
-            });
+    const login = useCallback(
+        async (email: string, password: string): Promise<void> => {
+            try {
+                const response = await axios.post(`${API_URL}/api/login`, {
+                    email,
+                    password,
+                });
 
-            console.log("Réponse de login:", response.data);
+                const { token: newToken, user: newUser } = response.data;
 
-            const { token: newToken, user: newUser } = response.data;
+                if (!newToken || !newUser) {
+                    console.error("Token ou user manquant dans la réponse !");
+                    return;
+                }
 
-            // Vérifie ici aussi avant de stocker
-            if (!newToken || !newUser) {
-                console.error("Token ou user manquant dans la réponse !");
-                return;
+                setToken(newToken);
+                setUser(newUser);
+                localStorage.setItem("token", newToken);
+                localStorage.setItem("user", JSON.stringify(newUser));
+
+                axios.defaults.headers.common[
+                    "Authorization"
+                ] = `Bearer ${newToken}`;
+            } catch (error) {
+                console.error("Erreur lors de la connexion :", error);
             }
+        },
+        []
+    );
 
-            setToken(newToken);
-            setUser(newUser);
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
-
-            axios.defaults.headers.common[
-                "Authorization"
-            ] = `Bearer ${newToken}`;
-        } catch (error) {
-            throw new Error("Login failed");
+    const logout = useCallback((): void => {
+        const confirmation = globalThis.confirm(
+            "Confirmez votre déconnexion !"
+        );
+        if (confirmation) {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete axios.defaults.headers.common["Authorization"];
         }
-    };
+    }, []);
 
-    const logout = (): void => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        delete axios.defaults.headers.common["Authorization"];
-    };
-
-    const value: AuthContextType = {
-        user,
-        token,
-        login,
-        logout,
-        isLoading,
-    };
+    const contextValue = useMemo(
+        () => ({ user, token, login, logout, isLoading }),
+        [user, token, login, logout, isLoading]
+    );
 
     return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={contextValue}>
+            {children}
+        </AuthContext.Provider>
     );
 };

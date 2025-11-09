@@ -47,8 +47,9 @@ def login():
 
         user_data = {
             'id': user.id,
+            'audd_key' : user.audd_key,
             'email': user.email,
-            'name': user.name
+            'name': user.name,
         }
 
         return jsonify({

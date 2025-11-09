@@ -35,6 +35,7 @@ def get_history(user_id):
     histories = History.query.filter_by(user_id=user_id).order_by(History.date_search.desc()).all()
 
     result = [{
+        "id":h.id,
         "title": h.title,
         "paroles": h.paroles,
         "date": h.date_search.strftime("%Y-%m-%d %H:%M:%S")

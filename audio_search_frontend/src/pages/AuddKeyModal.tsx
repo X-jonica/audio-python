@@ -35,7 +35,7 @@ const AuddKeyModal = ({
         setError("");
 
         try {
-            const token = localStorage.getItem("token"); // suppose que tu stockes le JWT
+            const token = localStorage.getItem("token");
             const response = await axios.post(
                 `${API_URL}/api/set-audd-key`,
                 { audd_key: inputKey },

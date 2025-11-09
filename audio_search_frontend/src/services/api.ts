@@ -40,13 +40,14 @@ class ApiService {
         const response = await axios.get(
             `${this.baseURL}/api/history/${userId}`
         );
-        return response.data.map((item: any, index: number) => ({
-            id: index + 1,
+        return response.data.map((item: any) => ({
+            id: item.id,
             title: item.title,
             paroles: item.paroles,
             searchDate: item.date,
             confidence: 1,
         }));
+
     }
 
     // DELETE /history/:history_id
